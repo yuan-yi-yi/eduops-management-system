@@ -21,7 +21,7 @@ EduOps 教培运营管理系统 面向中小型教培机构，涵盖教培部门
 - Vite构建工具
 
 ### 后端
-- SpringBoot核心框架、DIO容器管理和IO依赖注入
+- SpringBoot核心框架、IOC容器管理和DI依赖注入
 - MyBatis操作数据库
 - MySQL 8
 - JWT令牌登录认证
