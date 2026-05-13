@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuanshuai.mapper.ClazzMapper">
+    <select id="list" resultType="com.yuanshuai.pojo.Clazz">
+        select
+        c.id,
+        c.name,
+        c.room,
+        c.begin_date,
+        c.end_date,
+        c.master_id,
+        c.subject,
+        c.create_time,
+        c.update_time,
+        e.name as masterName,
+        (case
+        when now() > c.end_date then '已结课'
+        when c.begin_date > now() then '未开班'
+        else '在读中'
+        end) as status
+        from clazz c
+        left join emp e on c.master_id = e.id <!-- 关联班主任表（emp） -->
+        <where>
+            <if test="name != null and name !=''">
+                c.name like concat('%',#{name},'%')
+            </if>
+            <if test="begin != null and end != null">
+                and c.end_date between #{begin} and #{end}
+            </if>
+        </where>
+        <!-- 分页由MyBatis-Plus自动处理，无需写limit -->
+    </select>
+
+
+    <select id="getStudentCountData" resultType="java.util.Map">
+        select c.name            as clazz_name,
+               count(s.clazz_id) as num
+        from clazz c
+                 left join student s on c.id = s.clazz_id
+        group by clazz_name
+        order by num desc
+    </select>
+
+</mapper>

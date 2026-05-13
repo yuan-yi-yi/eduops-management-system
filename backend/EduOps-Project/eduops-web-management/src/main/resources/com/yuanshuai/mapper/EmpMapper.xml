@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuanshuai.mapper.EmpMapper">
+
+    <!-- 根据id更新员工信息，使用动态sql语法，if,可以灵活的更新需要更新的字段，避免更新所有字段 -->
+    <update id="update">
+        update emp
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="job != null">job = #{job},</if>
+            <if test="salary != null">salary = #{salary},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="entryDate != null">entry_date = #{entryDate},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+
+    <!-- 根据传递过来的ids列表, 批量删除员工基本信息 -->
+    <delete id="deleteByIds">
+        delete from emp where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+
+    <select id="list" resultType="com.yuanshuai.pojo.Emp">
+        select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id
+        <where>
+            <if test="name != null and name != ''">
+                e.name like  concat('%', #{name}, '%')
+            </if>
+            <if test="gender != null">
+                and e.gender = #{gender}
+            </if>
+            <if test="begin != null and end != null">
+                and  e.entry_date between #{begin} and #{end}
+            </if>
+        </where>
+        order by e.update_time desc
+    </select>
+
+
+    <!-- 根据传递过来的empId, 回显员工信息 -->
+    <!--使用resultMap标签，自定义封装-->
+    <resultMap id="empResultMap" type="com.yuanshuai.pojo.Emp">
+        <id column="id" property="id" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="name" property="name" />
+        <result column="gender" property="gender" />
+        <result column="phone" property="phone" />
+        <result column="job" property="job" />
+        <result column="salary" property="salary" />
+        <result column="image" property="image" />
+        <result column="entry_date" property="entryDate" />
+        <result column="dept_id" property="deptId" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+
+    <!--  自定义封装工作经历到emp对象中的exprList，使用collection标签，关联emp_expr表-->
+        <collection property="exprList" ofType="com.yuanshuai.pojo.EmpExpr">
+            <id column="expr_id" property="id" />
+            <result column="expr_emp_id" property="empId" />
+            <result column="expr_begin" property="begin" />
+            <result column="expr_end" property="end" />
+            <result column="expr_company" property="company" />
+            <result column="expr_job" property="job" />
+        </collection>
+    </resultMap>
+<!--  员工基本信息和工作经历查询语句，查询员工表和工作经历表，关联查询，根据empId查询-->
+
+    <select id="getById" resultMap="empResultMap">
+        select e.*,
+               ee.id as expr_id, ee.emp_id as expr_emp_id, ee.begin as expr_begin,
+               ee.end as expr_end, ee.company as expr_company, ee.job as expr_job
+        from emp e left join emp_expr ee on e.id = ee.emp_id
+        where e.id = #{id}
+    </select>
+
+
+
+
+    <!-- 统计员工职位，以及对应的人数有多少 -->
+    <select id="countEmpJobData" resultType="java.util.Map">
+        select
+            (case when job=1 then '班主任'
+                  when job=2 then '讲师'
+                  when job=3 then '学工主管'
+                  when job=4 then '教研主管'
+                  when job=5 then '咨询师'
+                  else '其他' end) pos,
+            count(*) num
+        from emp group by job order by num
+    </select>
+
+
+
+
+    <!-- 统计员工的性别信息 -->
+    <select id="countEmpGenderData" resultType="java.util.Map">
+        select
+            if(gender = 1, '男', '女') as name,
+            count(*) as value
+        from emp group by gender ;
+    </select>
+
+
+</mapper>

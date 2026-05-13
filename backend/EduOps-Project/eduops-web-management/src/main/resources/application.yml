@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: eduops-web-management
+  #配置数据库的连接信息
+  datasource:
+    url: jdbc:mysql://mysql:3306/eduops_db
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:xxx}
+
+#Mybatis的相关配置
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+
+#配置事务管理日志级别
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug
+
+#配置阿里云OSS
+aliyun:
+  oss:
+    endpoint: ${OSS_ENDPOINT:https://oss-cn-beijing.aliyuncs.com}
+    bucketName: ${OSS_BUCKET:your-bucket-name}
+    region: ${OSS_REGION:cn-beijing}
+    cdnDomain: ${OSS_CDN:https://your-cdn-domain.com}
